@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MAR DE NATAL</title>
+<style>
+:root{
+  --bg:#0f1724; --card:#0b1220; --accent:#d62828; --muted:#9aa4b2;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
+  background:linear-gradient(180deg,#071229 0%,#081428 40%,#041018 100%);
+  color:#fff;min-height:100vh;position:relative;overflow-x:hidden;
+}
+.container{max-width:1200px;margin:0 auto;padding:24px;}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap: wrap;}
+.brand-text h1{font-size:2.5rem;font-weight:700;color:#fff;letter-spacing:2px;margin:0;}
+.brand-text .muted{font-size:1rem;color:var(--muted);}
+nav a{color:var(--muted);text-decoration:none;margin-left:16px;}
+.hero{display:grid;grid-template-columns:1fr 380px;gap:24px;margin-top:24px;align-items:start;}
+.hero-card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:24px;border-radius:16px;}
+.hero-card h2{margin:0 0 8px 0;}
+.search{margin-top:12px;display:flex;gap:8px;}
+.search input{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff;}
+.btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#fff;cursor:pointer;}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:24px;}
+.card{background:var(--card);padding:12px;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:0.3s; cursor:pointer;}
+.card img{width:100%;height:160px;object-fit:cover;border-radius:10px;}
+.card h3{margin:12px 0 6px 0;font-size:16px;}
+.price-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
+.price{font-weight:700;}
+.muted{color:var(--muted);font-size:13px;}
+.aside{position:fixed;right:24px;top:120px;width:360px;max-height:calc(100vh - 140px);overflow:auto;z-index:100;background:rgba(11,18,32,0.95);padding:20px;border-radius:16px;box-shadow:0 0 10px rgba(0,0,0,0.5);}
+.cart h3{margin:0;color:#ffd700; display:flex;align-items:center; gap:8px;font-size:1.4rem;}
+.cart h3 svg{width:28px;height:28px;}
+.cart-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:rgba(0,0,0,0.2);}
+.cart-item img{width:60px;height:60px;border-radius:8px;object-fit:cover;}
+.cart-item div{flex:1;color:#fff;font-size:1rem;}
+.cart-item button{background:#d62828;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+.input-modern{width:100%;padding:10px;border-radius:8px;background:#0006;border:1px solid #555;color:#fff;font-size:1rem;}
+footer{margin-top:32px;text-align:center;color:var(--muted);font-size:14px;padding:30px 0;}
+@media(max-width:900px){.hero{grid-template-columns:1fr;}.aside{position:static;width:100%;margin-top:24px;}}
+@media(max-width:600px){header{flex-direction:column;align-items:flex-start;}nav{margin-top:12px;}}
+#snow{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
+</style>
+
+<script src="https://www.paypal.com/sdk/js?client-id=AS9C3_XuAsZeYUD933ktVcYv1CC3Wor1uJQiihkWEaJERA9zmfn3Njo4wJD1s9kbM9WbeYVvXVHe7-15&currency=BRL"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+</head>
+<body>
+
+<canvas id="snow"></canvas>
+
+<div class="container">
+  <header>
+    <div class="brand-text">
+      <h1 class="text-4xl font-bold text-red-600">MAR DE NATAL</h1>
+      <span class="muted">Tudo para seu Natal! Enfeites, Presentes e Magia</span>
+    </div>
+    <nav>
+      <a href="#produtos">Produtos</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-card">
+      <h2>Bem-vindo(a) à Mar de Natal</h2>
+      <p class="muted">Selecione os melhores enfeites e presentes para aquela noite especial.</p>
+
+      <div class="search">
+        <input id="search" placeholder="Buscar por: enfeite, árvore, guirlanda, presente" />
+        <button class="btn" onclick="applySearch()">Buscar</button>
+      </div>
+
+      <div id="produtos" class="products"></div>
+    </div>
+
+    <aside class="aside">
+      <div class="cart">
+        <h3>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#ffd700" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7H19M7 13l-2-6H21"/></svg>
+          Meu Carrinho (<span id="cartCount">0</span> itens)
+        </h3>
+
+        <div id="cartItems" class="cart-items">
+          <div class="muted">Seu carrinho está vazio.</div>
+        </div>
+
+        <div>
+          <label class="muted">Nome:</label>
+          <input type="text" id="nomeCliente" placeholder="Nome completo" class="input-modern">
+          <label class="muted" style="margin-top:4px;">CPF:</label>
+          <input type="text" id="cpfCliente" placeholder="000.000.000-00" class="input-modern">
+        </div>
+
+        <div style="margin-top:8px;">
+          <label class="muted">Endereço de Entrega:</label>
+          <input type="text" placeholder="Rua, Número, Bairro" class="input-modern" id="address">
+          <input type="text" placeholder="Cidade" class="input-modern" id="city" style="margin-top:4px;">
+          <input type="text" placeholder="CEP" class="input-modern" id="cep" style="margin-top:4px;" onblur="calcularFrete()">
+        </div>
+
+        <div style="display:flex;justify-content:space-between;">
+          <div class="muted">Subtotal</div>
+          <div id="cartTotal" class="price">R$ 0,00</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;">
+          <div class="muted">Frete</div>
+          <div id="shipping" class="price">R$ 0,00</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;font-weight:700;color:#d62828;">
+          <div>Total</div>
+          <div id="grandTotal" class="price">R$ 0,00</div>
+        </div>
+
+        <div id="paypal-button-container" style="margin-top:12px"></div>
+
+        <div class="pix-box" style="margin-top:12px;background:rgba(255,255,255,0.08);padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);backdrop-filter: blur(4px);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/2560px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png" width="28">
+            <h4 style="margin:0;font-size:1.1rem;color:#00e676;">Pagamento via PIX</h4>
+          </div>
+
+          <p class="muted" style="font-size:13px;margin-top:-4px;">Gere o QR Code ou copie o código PIX para finalizar o pagamento.</p>
+
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn" onclick="gerarPixQR()" style="flex:1;min-width:120px;background:#00e676;">Gerar QR Code</button>
+            <button class="btn" onclick="mostrarBrCode()" style="flex:1;min-width:120px;background:#008cff;">Código Copia & Cola</button>
+          </div>
+
+          <div id="pixQR" style="margin-top:16px;padding:12px;display:flex;justify-content:center;border-radius:12px;background:rgba(255,255,255,0.06);"></div>
+
+          <textarea id="brCodeTextarea" class="input-modern" style="margin-top:10px;display:none;height:90px;font-size:12px;"></textarea>
+
+          <div id="pixInfo" class="muted" style="margin-top:10px;font-size:13px;background:rgba(0,0,0,0.2);padding:8px;border-radius:8px;text-align:center;"></div>
+
+          <div id="pixConfirmacao" style="display:none;margin-top:10px;padding:8px;background:#00e676;border-radius:8px;color:#000;text-align:center;">
+            Pagamento confirmado! <br> Seu pedido está sendo processado.
+          </div>
+
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <footer id="sobre">
+    <section class="p-10 bg-white text-gray-800 rounded-3xl shadow-lg mt-10 border border-gray-200 flex justify-end">
+      <div class="w-full max-w-md text-right">
+        <h2 class="text-3xl font-extrabold text-red-600 mb-20" style="margin-left:1cm;"> Sobre a Mar de Natal</h2>
+        <p class="mb-4 text-lg leading-relaxed text-gray-700">A Mar de Natal nasceu com a missão de trazer a verdadeira magia natalina para dentro da sua casa...</p>
+        <p class="mb-4 text-lg leading-relaxed text-gray-700">Acreditamos que o Natal vai além de datas — ele é sentimento, união e brilho nos olhos...</p>
+        <p class="text-2xl font-bold text-red-600">Na Mar de Natal, seu Natal ganha vida!</p>
+      </div>
+    </section>
+    <div style="margin-top:8px" id="contato">Contato: contato@mardonatal.ex</div>
+  </footer>
+</div>
+
+
+<script>
+// --- Produtos ---
+const produtos = [
+  {id:1, nome:'Bola Natalina Dourada (pack 6)', desc:'Conjunto de 6 bolas decorativas em dourado.', preco:39.90, img:'https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQ56UYzpyWobjIkce7Fc5dUpC9W_f90OiSbnVN2BRN30cTVulVyDJLTd78gMDy9mj5nFwbHXqj8PMp_Irj-FG4WbrpviJ3H6JKNSLWBaPbN8yh8xAWsnzJRsA_8'},
+  {id:2, nome:'Guirlanda Verde com laço', desc:'Guirlanda para porta com fita vermelha.', preco:79.90, img:'https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRIUkMZguYBghZJUw0_nEJKINPyBcAYopGrY4ZQkOKtddo06WHH81Os_M0LW8mv7zT07vlHXOa2GLP_1zsXkJEabJ4u6QuhoPPl253FBiXwFxpo-oggS8Vx'},
+  {id:3, nome:'Luzes de Fada (20m)', desc:'Cordão de luzes LED.', preco:49.90, img:'https://down-br.img.susercontent.com/file/sg-11134201-22110-7eb8sugqscjvde@resize_w450_nl.webp'},
+  {id:4, nome:'Árvore de Natal 180cm', desc:'Árvore artificial.', preco:349.00, img:'https://img.ltwebstatic.com/v4/j/spmp/2025/09/25/97/17588089561e3a88e0cd43cf91e6a17158bbfe3b87_thumbnail_405x.webp'},
+  {id:5, nome:'Meias Natalinas (2 un.)', desc:'Meias decorativas.', preco:29.90, img:'https://m.media-amazon.com/images/I/71zG0a0EQZL._AC_SX679_.jpg'},
+  {id:6, nome:'Enfeite de Papai Noel', desc:'Mini Papai Noel.', preco:24.50, img:'https://m.media-amazon.com/images/I/61bouayeY1L._AC_SL1500_.jpg'}
+];
+
+// --- Carrinho ---
+let cart=[];
+let freteCalculado=0;
+
+function formatPrice(v){
+  return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+function renderProducts(list){
+  const container=document.getElementById('produtos');
+  container.innerHTML='';
+  list.forEach(p=>{
+    const el=document.createElement('div'); 
+    el.className='card';
+    el.innerHTML=`
+      <img src="${p.img}">
+      <h3>${p.nome}</h3>
+      <div class="muted">${p.desc}</div>
+      <div class="price-row">
+        <div class="price">${formatPrice(p.preco)}</div>
+        <button class="btn" onclick="addToCart(${p.id})">Adicionar</button>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+
+function addToCart(id){
+  const prod=produtos.find(p=>p.id===id);
+  const exist=cart.find(c=>c.id===id);
+  if(exist) exist.qtd++;
+  else cart.push({...prod,qtd:1});
+  renderCart();
+}
+
+function removeFromCart(id){
+  cart=cart.filter(c=>c.id!==id);
+  renderCart();
+}
+
+function renderCart(){
+  const cartItems=document.getElementById('cartItems');
+  const cartCount=document.getElementById('cartCount');
+  const cartTotal=document.getElementById('cartTotal');
+  const grandTotal=document.getElementById('grandTotal');
+  const shipping=document.getElementById('shipping');
+  
+  cartItems.innerHTML='';
+
+  if(cart.length===0){
+    cartItems.innerHTML='<div class="muted">Seu carrinho está vazio.</div>';
+  } else {
+    cart.forEach(c=>{
+      const div=document.createElement('div');
+      div.className='cart-item';
+      div.innerHTML=`
+        <img src="${c.img}">
+        <div>${c.nome} x ${c.qtd}</div>
+        <button onclick="removeFromCart(${c.id})">Remover</button>`;
+      cartItems.appendChild(div);
+    });
+  }
+
+  const total=cart.reduce((acc,c)=>acc+c.preco*c.qtd,0);
+  const frete=freteCalculado;
+
+  cartTotal.textContent=formatPrice(total);
+  shipping.textContent=formatPrice(frete);
+  grandTotal.textContent=formatPrice(total+frete);
+  cartCount.textContent=cart.reduce((acc,c)=>acc+c.qtd,0);
+}
+
+function calcularFrete(){
+  let cep=document.getElementById('cep').value.replace(/\D/g,'');
+  if(cep.length!==8){freteCalculado=0;renderCart();return;}
+  freteCalculado=parseInt(cep[cep.length-1])%2===0?15:25;
+  renderCart();
+}
+
+function applySearch(){
+  const term=document.getElementById('search').value.toLowerCase();
+  renderProducts(produtos.filter(p=>p.nome.toLowerCase().includes(term)||p.desc.toLowerCase().includes(term)));
+}
+
+renderProducts(produtos);
+renderCart();
+
+// --- PIX ---
+const pixKey='53370278000117';
+
+function gerarPixQR(){
+  const total=parseFloat(cart.reduce((a,b)=>a+b.preco*b.qtd,0)+freteCalculado).toFixed(2);
+  if(!total || total<=0){alert('Adicione produtos ao carrinho'); return;}
+
+  const brcode=`00020126380014BR.GOV.BCB.PIX0136${pixKey}520400005303986540${total.replace('.',',')}5802BR5912MAR DE NATAL6009Sao Paulo62290525Pedido1236304`;
+
+  document.getElementById('brCodeTextarea').value=brcode;
+  document.getElementById('pixQR').innerHTML='';
+
+  new QRCode(document.getElementById('pixQR'),{
+    text:brcode,
+    width:160,
+    height:160
+  });
+
+  document.getElementById('pixInfo').innerText='PIX gerado com sucesso. Valor: '+formatPrice(parseFloat(total));
+}
+
+function mostrarBrCode(){
+  const txt=document.getElementById('brCodeTextarea');
+  txt.style.display='block';
+  txt.select();
+  document.execCommand('copy');
+  alert('Código PIX copiado!');
+}
+
+
+// --- PayPal ---
+paypal.Buttons({
+  createOrder: function(data, actions){
+    const total=parseFloat(cart.reduce((a,b)=>a+b.preco*b.qtd,0)+freteCalculado).toFixed(2);
+    return actions.order.create({purchase_units:[{amount:{value:total}}]});
+  },
+  onApprove: function(data, actions) {
+    return actions.order.capture().then(function(details){
+      alert('Pagamento PayPal concluído! Obrigado, '+details.payer.name.given_name);
+    });
+  }
+}).render('#paypal-button-container');
+
+
+// --- Neve ---
+const canvas=document.getElementById('snow');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let flakes=[];
+for(let i=0;i<200;i++){
+  flakes.push({
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    r:Math.random()*4+1,
+    d:Math.random()*1
+  });
+}
+
+function drawFlakes(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='white';
+  ctx.beginPath();
+  for(let i=0;i<flakes.length;i++){
+    let f=flakes[i];
+    ctx.moveTo(f.x,f.y);
+    ctx.arc(f.x,f.y,f.r,0,Math.PI*2,true);
+  }
+  ctx.fill();
+  moveFlakes();
+}
+
+function moveFlakes(){
+  for(let i=0;i<flakes.length;i++){
+    let f=flakes[i];
+    f.y+=Math.pow(f.d,2)+1;
+    f.x+=Math.sin(f.y*0.01)*2;
+    if(f.y>canvas.height){
+      flakes[i]={x:Math.random()*canvas.width,y:0,r:f.r,d:f.d};
+    }
+  }
+}
+
+setInterval(drawFlakes,33);
+
+window.onresize=function(){
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+};
+</script>
+
+</body>
+</html>
+
